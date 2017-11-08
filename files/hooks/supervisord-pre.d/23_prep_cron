@@ -2,7 +2,7 @@
 
 # An inline replace using sed would require reducing restrictions on /etc further. This gets round the problem
 # by writing to a file in /tmp and then over-writing the result into the logrotate.
-sed "s|<CRON_LOG>|$CRON_LOG_FILE|" /etc/logrotate.conf > /tmp/lr && cat /tmp/lr > /etc/logrotate.conf && rm -rf /tmp/lr
+sed "s|<CRON_LOG>|$CRON_LOG_FILE|" /etc/logrotate.conf.template > /etc/logrotate.conf
 
 # Make sure the crontabs folder exists on the share
 [ -d /var/spool/cron/crontabs ] || mkdir -p /var/spool/cron/crontabs
@@ -11,9 +11,8 @@ sed "s|<CRON_LOG>|$CRON_LOG_FILE|" /etc/logrotate.conf > /tmp/lr && cat /tmp/lr 
 CRON_VOL_MOUNTED=$(mount | grep "/var/spool/cron" > /dev/null 2>&1 && echo 'true' || echo 'false')
 if [ $CRON_VOL_MOUNTED == 'true' ]; then
 	echo "Enabling cron"
-	sed 's/autostart = false/autostart = true/' /etc/supervisor/conf.d/cron.conf > /tmp/cronconf && \
-			cat /tmp/cronconf > /etc/supervisor/conf.d/cron.conf && \
-			rm -rf /tmp/cronconf
+	sed 's/autostart = false/autostart = true/' /etc/supervisor/conf.d/cron.conf.template > /etc/supervisor/conf.d/cron.conf 
 else
 	echo "No cron volume detected, so not running cron"
+	cp /etc/supervisor/conf.d/cron.conf.template /etc/supervisor/conf.d/cron.conf
 fi
